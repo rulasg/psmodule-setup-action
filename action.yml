@@ -29,7 +29,7 @@ runs:
   steps:
     - name: Setup the module
       env:
-        InputName: ${{input.Name}}
+        InputName: ${{ inputs.Name }}
         InputVersion: ${{ inputs.Version }}
         InputAllowPreReleaseVersions: ${{ inputs.AllowPreReleaseVersions }}
       shell: pwsh
