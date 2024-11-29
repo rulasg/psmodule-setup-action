@@ -1,0 +1,63 @@
+name: 'TestingHelper Setup'
+author: 'rulasg'
+description: 'Setup TestingHelper module for later use on the workflow Job.'
+branding:
+  icon: "package"
+  color: "orange"
+inputs:
+  Version:
+    description: 'Specifies which version of TestingHelper to use.'
+    required: false
+  AllowPreReleaseVersions:
+    description: 'Allow the use of prerelease version of TestingHelper'
+    default: 'true'
+    required: false
+#     AllowedSkippedTests:
+#       description: 'Allow to use PreRelease versions onf TestingHelper module'
+#       required: false
+#     AllowedSkippedTests:
+#       description: 'Allow tests to be skipped without failing'
+#       required: false
+#     AllowedNotImplementedTests:
+#       description: 'Allow tests to be skipped without failing'
+#       required: false
+runs:
+  using: "composite"
+  steps:
+    - name: run TestingHelper
+      env:
+        InputVersion: ${{ inputs.Version }}
+        InputAllowPreReleaseVersions: ${{ inputs.AllowPreReleaseVersions }}
+      shell: pwsh
+      run: |
+
+        $AllowPrerelease = ($env:InputAllowPreReleaseVersions -eq 'true')
+        $Version = $env:InputVersion
+
+        function Import-TestingHelper{
+          [CmdletBinding()]
+          param (
+              [Parameter()][string]$Version,
+              [Parameter()][switch]$AllowPrerelease,
+              [Parameter()][switch]$PassThru
+          )
+          
+          if ($Version) {
+              $V = $Version.Split('-')
+              $semVer = $V[0]
+              $AllowPrerelease = ($AllowPrerelease -or ($null -ne $V[1]))
+          }
+          
+          $module = Import-Module TestingHelper -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer
+      
+          if ($null -eq $module) {
+              $installed = Install-Module -Name TestingHelper -Force -AllowPrerelease:$AllowPrerelease -passThru -RequiredVersion:$Version
+              $module = Import-Module -Name $installed.Name -RequiredVersion ($installed.Version.Split('-')[0]) -Force -PassThru
+          }
+      
+          if ($PassThru) {
+              $module
+          }
+        }
+
+        Import-TestingHelper -AllowPrerelease:$AllowPrerelease -Version:$Version

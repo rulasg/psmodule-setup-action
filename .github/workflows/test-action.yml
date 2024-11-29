@@ -1,0 +1,100 @@
+# This is a workflow to test your PowerShell module with TestingHelper
+# https://github.com/rulasg/DemoPsModule/blob/main/.github/workflows/test_with_TestingHelper.yml
+
+name: Test TestingHelper Setup Action
+
+# Controls when the workflow will run
+on:
+
+  # Push and push-pr events trigger the workflow
+  push:
+      branches: [ main ]
+  pull_request:
+      branches: [ main ]
+
+  # Allow to be called from other workflows
+  workflow_call:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  # To run test we only need to read the repository
+  contents: read
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test-without-Version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run local action
+        uses: ./
+
+      - name: Assert the test run
+        shell: pwsh
+        run: |
+          $module = Get-Module -Name Testinghelper -ListAvailable
+  
+          # Check if module is null
+          if ($null -eq $module) {
+              # Import module
+              throw "Module not found"
+          } else {
+              $module
+              write-host "TestingHelper module found !!" -ForegroundColor Green
+          }
+
+  test-with-Version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run local action
+        uses: ./
+        with:
+          Version: '1.3'
+
+      - name: Assert the test run
+        shell: pwsh
+        run: |
+          $module = Get-Module -Name Testinghelper -ListAvailable
+  
+          # Check if module is null
+          if ('1.3' -ne $module.version.ToString()) {
+              # Import module
+              throw "Module not found"
+          } else {
+              $module
+              write-host "TestingHelper module found !!" -ForegroundColor Green
+          }
+
+  test-with-AllowPrerelease-false:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run local action
+        uses: ./
+        with:
+          AllowPreReleaseVersions: 'false'
+
+      - name: Assert the test run
+        shell: pwsh
+        run: |
+          $module = Get-Module -Name Testinghelper -ListAvailable
+  
+          # Check if module is null
+          if ('2.0' -ne $module.version.ToString()) {
+              # Import module
+              throw "Module not found"
+          } else {
+              $module
+              write-host "TestingHelper module found !!" -ForegroundColor Green
+          }
+
