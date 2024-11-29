@@ -66,4 +66,4 @@ runs:
           }
         }
 
-        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version
+        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version -Name $Name
