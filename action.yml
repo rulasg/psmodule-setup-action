@@ -1,19 +1,22 @@
-name: 'TestingHelper Setup'
+name: 'Powershell Module Setup'
 author: 'rulasg'
-description: 'Setup TestingHelper module for later use on the workflow Job.'
+description: 'Setup a powershell module for later use on the workflow Job.'
 branding:
   icon: "package"
   color: "orange"
 inputs:
+  Name:
+    description: 'Name of the module to setup'
+    required: true
   Version:
-    description: 'Specifies which version of TestingHelper to use.'
+    description: 'Specifies which version of the module to use.'
     required: false
   AllowPreReleaseVersions:
-    description: 'Allow the use of prerelease version of TestingHelper'
+    description: 'Allow the use of prerelease version of the module'
     default: 'true'
     required: false
 #     AllowedSkippedTests:
-#       description: 'Allow to use PreRelease versions onf TestingHelper module'
+#       description: 'Allow to use PreRelease versions onf the module module'
 #       required: false
 #     AllowedSkippedTests:
 #       description: 'Allow tests to be skipped without failing'
@@ -24,8 +27,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: run TestingHelper
+    - name: Setup the module
       env:
+        InputName: ${{input.Name}}
         InputVersion: ${{ inputs.Version }}
         InputAllowPreReleaseVersions: ${{ inputs.AllowPreReleaseVersions }}
       shell: pwsh
@@ -33,10 +37,12 @@ runs:
 
         $AllowPrerelease = ($env:InputAllowPreReleaseVersions -eq 'true')
         $Version = $env:InputVersion
+        $Name = $env:InputName
 
-        function Import-TestingHelper{
+        function Import-MyModule{
           [CmdletBinding()]
           param (
+              [Parameter()][string]$Name,
               [Parameter()][string]$Version,
               [Parameter()][switch]$AllowPrerelease,
               [Parameter()][switch]$PassThru
@@ -48,10 +54,10 @@ runs:
               $AllowPrerelease = ($AllowPrerelease -or ($null -ne $V[1]))
           }
           
-          $module = Import-Module TestingHelper -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer
+          $module = Import-Module $Name -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer
       
           if ($null -eq $module) {
-              $installed = Install-Module -Name TestingHelper -Force -AllowPrerelease:$AllowPrerelease -passThru -RequiredVersion:$Version
+              $installed = Install-Module -Name $Name -Force -AllowPrerelease:$AllowPrerelease -passThru -RequiredVersion:$Version
               $module = Import-Module -Name $installed.Name -RequiredVersion ($installed.Version.Split('-')[0]) -Force -PassThru
           }
       
@@ -60,4 +66,4 @@ runs:
           }
         }
 
-        Import-TestingHelper -AllowPrerelease:$AllowPrerelease -Version:$Version
+        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version
