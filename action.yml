@@ -16,7 +16,7 @@ inputs:
     default: 'true'
     required: false
 #     AllowedSkippedTests:
-#       description: 'Allow to use PreRelease versions onf the module module'
+#       description: 'Allow to use PreRelease versions of the module'
 #       required: false
 #     AllowedSkippedTests:
 #       description: 'Allow tests to be skipped without failing'
