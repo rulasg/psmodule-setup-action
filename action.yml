@@ -42,7 +42,7 @@ runs:
         function Import-MyModule{
           [CmdletBinding()]
           param (
-              [Parameter()][string]$Name,
+              [Parameter(Mandatory)][string]$Name,
               [Parameter()][string]$Version,
               [Parameter()][switch]$AllowPrerelease,
               [Parameter()][switch]$PassThru
@@ -53,12 +53,17 @@ runs:
               $semVer = $V[0]
               $AllowPrerelease = ($AllowPrerelease -or ($null -ne $V[1]))
           }
-          
-          $module = Import-Module $Name -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer
-      
+
+          # Check if module is already installed. Use the version parameter transformation
+          $module = Import-Module -Name $Name -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+
+          # If module not installed, install it
           if ($null -eq $module) {
-              $installed = Install-Module -Name $Name -Force -AllowPrerelease:$AllowPrerelease -passThru -RequiredVersion:$Version
-              $module = Import-Module -Name $installed.Name -RequiredVersion ($installed.Version.Split('-')[0]) -Force -PassThru
+              # Install module from PowershellGallery
+              $installed = Install-Module -Name $Name -Force -PassThru -AllowPrerelease:$AllowPrerelease  -RequiredVersion:$Version -Verbose
+
+              # Now install the module that we have just installed
+              $module = Import-Module -Name $installed.Name -Force -PassThru -RequiredVersion ($installed.Version.Split('-')[0]) -Verbose
           }
       
           if ($PassThru) {
@@ -66,4 +71,4 @@ runs:
           }
         }
 
-        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version -Name $Name
+        Import-MyModule -AllowPrerelease:$AllowPrerelease -PassThru -Version:$Version -Name $Name 
