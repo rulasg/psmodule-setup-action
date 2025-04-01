@@ -57,7 +57,7 @@ runs:
           "Importing module $Name with version $semVer and AllowPrerelease $AllowPrerelease" | Write-Host
 
           # Check if module is already installed. Use the version parameter transformation
-          $module = Import-Module -Name $Name -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+          $module = Get-Module -Name $Name -ListAvailable-ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
 
           # If module not installed, install it
           if ($null -eq $module) {
@@ -70,13 +70,11 @@ runs:
               "Installed module $($installed.Name) with version $($installed.Version)" | Write-Host
               Write-output $installed
 
-              # Now install the module that we have just installed
-              $module = Import-Module -Name $installed.Name -Force -PassThru -RequiredVersion ($installed.Version.Split('-')[0]) -Verbose
+              # Confirm installed module
+              Get-Module -Name $Name -ListAvailable-ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+              
           }
       
-          if ($PassThru) {
-              $module
-          }
         }
 
-        Import-MyModule -AllowPrerelease:$AllowPrerelease -PassThru -Version:$Version -Name $Name 
+        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version -Name $Name 
