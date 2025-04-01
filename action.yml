@@ -71,7 +71,7 @@ runs:
               Write-output $installed
 
               # Confirm installed module
-              Get-Module -Name $Name -ListAvailable-ErrorAction SilentlyContinue
+              Get-Module -Name $Name -ListAvailable -ErrorAction SilentlyContinue
               
           }
       
