@@ -57,7 +57,7 @@ runs:
           "Importing module $Name with version $semVer and AllowPrerelease $AllowPrerelease" | Write-Host
 
           # Check if module is already installed. Use the version parameter transformation
-          $module = Get-Module -Name $Name -ListAvailable -ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+          $module = Get-Module -Name $Name -ListAvailable -ErrorAction SilentlyContinue 
 
           # If module not installed, install it
           if ($null -eq $module) {
@@ -71,7 +71,7 @@ runs:
               Write-output $installed
 
               # Confirm installed module
-              Get-Module -Name $Name -ListAvailable-ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+              Get-Module -Name $Name -ListAvailable-ErrorAction SilentlyContinue
               
           }
       
