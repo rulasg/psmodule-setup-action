@@ -54,21 +54,27 @@ runs:
               $AllowPrerelease = ($AllowPrerelease -or ($null -ne $V[1]))
           }
 
+          "Importing module $Name with version $semVer and AllowPrerelease $AllowPrerelease" | Write-Host
+
           # Check if module is already installed. Use the version parameter transformation
-          $module = Import-Module -Name $Name -PassThru -ErrorAction SilentlyContinue -RequiredVersion:$semVer -Verbose
+          $module = Get-Module -Name $Name -ListAvailable -ErrorAction SilentlyContinue 
 
           # If module not installed, install it
           if ($null -eq $module) {
+              
+              "Module not found, installing..." | Write-Host
+
               # Install module from PowershellGallery
               $installed = Install-Module -Name $Name -Force -PassThru -AllowPrerelease:$AllowPrerelease  -RequiredVersion:$Version -Verbose
 
-              # Now install the module that we have just installed
-              $module = Import-Module -Name $installed.Name -Force -PassThru -RequiredVersion ($installed.Version.Split('-')[0]) -Verbose
+              "Installed module $($installed.Name) with version $($installed.Version)" | Write-Host
+              Write-output $installed
+
+              # Confirm installed module
+              Get-Module -Name $Name -ListAvailable -ErrorAction SilentlyContinue
+              
           }
       
-          if ($PassThru) {
-              $module
-          }
         }
 
-        Import-MyModule -AllowPrerelease:$AllowPrerelease -PassThru -Version:$Version -Name $Name 
+        Import-MyModule -AllowPrerelease:$AllowPrerelease -Version:$Version -Name $Name 
